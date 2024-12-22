@@ -149,39 +149,60 @@ export const toFav = asyncHandler(async (req, res) => {
   const { rid } = req.params;
 
   try {
+    // Find the user
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (user.favResidenciesID.includes(rid)) {
-      const updatedUser = await prisma.user.update({
-        where: { email },
-        data: {
-          favResidenciesID: {
-            set: user.favResidenciesID.filter((id) => id != rid),
-          },
-        },
-      });
-
-      res.send({ message: "Removed from favorites", user: updatedUser });
-    } else {
-      const updatedUser = await prisma.user.update({
-        where: { email },
-        data: {
-          favResidenciesID: {
-            push: rid,
-          },
-        },
-      });
-
-      res.send({ message: "Updated favorites", user: updatedUser });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
+    // Check if the residency ID is already in favorites
+    const isFav = user.favResidenciesID.includes(rid);
+
+    // Update the user's favorites
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: {
+        favResidenciesID: isFav
+          ? { set: user.favResidenciesID.filter((id) => id !== rid) } // Remove
+          : { set: [...user.favResidenciesID, rid] }, // Add
+      },
+    });
+
+    // Respond with success message
+    const message = isFav
+      ? "Removed from favorites"
+      : "Added to favorites";
     res.status(200).json({
-      message: "Favorites updated successfully",
+      message,
       favResidenciesID: updatedUser.favResidenciesID,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+export const allFav = asyncHandler(async (req, res) => {
+  const { email } = req.body; // Extract email from request body
+
+  try {
+    // Find the user's favorite residencies
+    const favResd = await prisma.user.findUnique({
+      where: { email },
+      select: { favResidenciesID: true }, // Only select the favorite residencies IDs
+    });
+
+    // Handle case where the user is not found
+    if (!favResd) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Send the user's favorite residencies IDs as the response
+    res.status(200).json(favResd); 
+  } catch (err) {
+    console.error(err); // Log the error for debugging
+    res.status(500).json({ error: err.message }); // Return error response
   }
 });
