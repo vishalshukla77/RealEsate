@@ -1,9 +1,18 @@
 import express from 'express';
-import { createUser } from '../controller/userCntrl.js';
+import { createUser,bookVisit,allBookings } from '../controller/userCntrl.js';
 
-const router = express.Router();
+const userRoute = express.Router();
+
+
 
 // Route to handle user registration
-router.post('/register', createUser);
 
-export default router;
+
+userRoute.post('/register', createUser);
+userRoute.post('/bookvisit/:id',bookVisit);
+userRoute.get('/allBookings',allBookings);
+
+export default userRoute; 
+
+
+// Corrected export
