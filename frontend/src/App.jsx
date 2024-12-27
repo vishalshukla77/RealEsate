@@ -10,7 +10,7 @@ import AddProperty from './pages/AddProperty';
 import Favorites from './pages/Favorites';
 import Bookings from './pages/Bookings';
 import Layout from './components/Layout';
-
+import Property from './pages/Property';
 import 'react-toastify/dist/ReactToastify.css'; // Corrected the import path of the CSS
 
 export default function App() {
@@ -23,7 +23,12 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/listing" element={<Listing />} />
+              <Route path="/listing">
+                {/* Index route for "/listing" */}
+                <Route index element={<Listing />} />
+                {/* Route for individual property */}
+                <Route path=":propertyId" element={<Property />} />
+              </Route>
               <Route path="/addproperty" element={<AddProperty />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/favorites" element={<Favorites />} />

@@ -24,3 +24,27 @@ export const getAllProperties = async () => {
     throw error;  // Re-throw the error to be handled by React Query
   }
 };
+
+export const getProperty=async(id)=>{
+
+  try {
+    const response = await api.get(`/residency/${id}`, {
+      timeout: 10 * 1000,  // Timeout set to 10 seconds
+    });
+
+    // Check for error status codes and throw an error if necessary
+    if (response.status === 400 || response.status === 500) {
+      throw new Error(response.data.message || "An error occurred");
+    }
+
+    return response.data;  // Return the fetched data
+  } catch (error) {
+    // Show an error toast if fetching fails
+    toast.error(error.message || "Failed to fetch properties");
+    throw error;  // Re-throw the error to be handled by React Query
+  }
+
+}
+
+
+

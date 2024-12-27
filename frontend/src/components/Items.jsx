@@ -1,11 +1,16 @@
 import React from 'react';
 import { MdOutlineBed, MdOutlineBathtub, MdOutlineGarage } from 'react-icons/md';
 import { AiOutlineHeart } from 'react-icons/ai';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CgRuler } from 'react-icons/cg'
 function Items({ property }) {
+const navigate=useNavigate();
+
+
+
+
   return (
-    <div className="rounded-2xl p-5 bg-white flex flex-col justify-between h-full">
+    <div onClick={()=>navigate(`../listing/${property.id}`)} className="rounded-2xl p-5 bg-white flex flex-col justify-between h-full">
       {/* Image Section */}
       <div className="pb-2 relative">
         <img
