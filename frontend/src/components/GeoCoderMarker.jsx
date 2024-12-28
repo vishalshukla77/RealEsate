@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
-import axios from 'axios'; // Axios for geocoding
-import L from 'leaflet'; // Import Leaflet for custom icon and animation
+import axios from 'axios';
+import L from 'leaflet';
+
+// Custom Leaflet icon for the location marker
+const locationIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Replace with your desired icon URL
+  iconSize: [32, 32],
+  iconAnchor: [16, 32], // Center the icon at its bottom point
+  popupAnchor: [0, -32],
+});
 
 function GeoCoderMarker({ address, city, country }) {
   const map = useMap(); // Get the map instance
@@ -22,12 +30,8 @@ function GeoCoderMarker({ address, city, country }) {
       .then((response) => {
         if (response.data && response.data[0]) {
           const { lat, lon } = response.data[0];
-          setPosition([lat, lon]);
-          map.setView([lat, lon], 13); // Set the map center to the geocoded position
-
-          // Apply bounce animation to the marker when position is set
-          const marker = L.marker([lat, lon]).addTo(map);
-          marker.bounce(); // This bounces the marker
+          setPosition([parseFloat(lat), parseFloat(lon)]);
+          map.setView([lat, lon], 13); // Center map to the geocoded position
         }
       })
       .catch((error) => {
@@ -35,8 +39,21 @@ function GeoCoderMarker({ address, city, country }) {
       });
   }, [address, city, country, map]);
 
+  useEffect(() => {
+    // Update marker position dynamically as the map zooms
+    const handleZoom = () => {
+      map.setView(position);
+    };
+
+    map.on('zoomend', handleZoom);
+
+    return () => {
+      map.off('zoomend', handleZoom); // Clean up event listener on component unmount
+    };
+  }, [map, position]);
+
   return (
-    <Marker position={position}>
+    <Marker position={position} icon={locationIcon}>
       <Popup>{`${address}, ${city}, ${country}`}</Popup>
     </Marker>
   );
