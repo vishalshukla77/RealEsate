@@ -1,22 +1,31 @@
-import { useQuery } from '@tanstack/react-query';
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { PuffLoader } from 'react-spinners';
-import { AiOutlineHeart } from 'react-icons/ai';
-import { MdOutlineBed, MdOutlineBathtub, MdOutlineGarage } from 'react-icons/md';
-import { CgRuler } from 'react-icons/cg';
-import { getProperty } from '../utlis/api'; // Ensure the correct import path
-import { FaLocationDot } from 'react-icons/fa6';
-import Map from '../components/Map'; // Ensure Map is correctly imported
+import React, { useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation, Link } from "react-router-dom";
+import { PuffLoader } from "react-spinners";
+import { AiOutlineHeart } from "react-icons/ai";
+import { MdOutlineBed, MdOutlineBathtub, MdOutlineGarage } from "react-icons/md";
+import { CgRuler } from "react-icons/cg";
+import { FaLocationDot } from "react-icons/fa6";
+import { getProperty } from "../utlis/api"; // Ensure the correct import path
+import Map from "../components/Map"; // Ensure Map is correctly imported
+import useAuthCheck from "../hooks/userAuthCheck.jsx";
+import BookingModal from "../components/BookingModal"; // Correct BookingModal import
 
 function Property() {
   const { pathname } = useLocation();
-  const id = pathname.split('/').slice(-1)[0];
+  const id = pathname.split("/").slice(-1)[0];
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['resd', id],
+    queryKey: ["resd", id],
     queryFn: () => getProperty(id),
   });
+
+  const [modalOpened, setModalOpened] = useState(false);
+
+  const { validateLogin } = useAuthCheck();
+  const { user } = useAuth0();
 
   if (isLoading) {
     return (
@@ -29,6 +38,12 @@ function Property() {
   if (isError) {
     return <div className="h-64 flexCenter">Error while fetching</div>;
   }
+
+  const handleBookVisit = () => {
+    if (validateLogin()) {
+      setModalOpened(true);
+    }
+  };
 
   return (
     <section className="max-padd-container my-[99px]">
@@ -83,11 +98,18 @@ function Property() {
 
           {/* Book Button */}
           <div className="w-full">
-            <Link to={`/listing/${data.id}`} className="w-full">
-              <button className="btn-secondary rounded-xl py-3 px-6 shadow-sm bg-primary text-white font-semibold w-full">
-                Book the Visit
-              </button>
-            </Link>
+            <button
+              onClick={handleBookVisit}
+              className="btn-secondary rounded-xl py-3 px-6 shadow-sm bg-primary text-white font-semibold w-full"
+            >
+              Book the Visit
+            </button>
+            <BookingModal
+              opened={modalOpened}
+              setOpened={setModalOpened}
+              propertyId={id}
+              email={user?.email}
+            />
           </div>
         </div>
 

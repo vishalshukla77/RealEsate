@@ -1,5 +1,6 @@
 import express from 'express';
 import { createUser,bookVisit,allBookings,cancelBooking, toFav,allFav } from '../controller/userCntrl.js';
+import jwtCheck from '../config/auth0config.js';
 
 const userRoute = express.Router();
 
@@ -8,12 +9,12 @@ const userRoute = express.Router();
 // Route to handle user registration
 
 
-userRoute.post('/register', createUser);
-userRoute.post('/bookvisit/:id',bookVisit);
+userRoute.post('/register',jwtCheck, createUser);
+userRoute.post('/bookvisit/:id',jwtCheck,bookVisit);
 userRoute.post('/allBookings',allBookings);
-userRoute.post('/removeBooking/:id',cancelBooking);
-userRoute.post('/toFav/:rid',toFav)
-userRoute.post('/allFav',allFav);
+userRoute.post('/removeBooking/:id',jwtCheck,cancelBooking);
+userRoute.post('/toFav/:rid',jwtCheck,toFav)
+userRoute.post('/allFav',jwtCheck,allFav);
 export default userRoute; 
 
 
