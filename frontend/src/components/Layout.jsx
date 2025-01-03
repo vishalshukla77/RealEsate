@@ -10,6 +10,9 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Layout() {
+
+
+  usefavourites();
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
 

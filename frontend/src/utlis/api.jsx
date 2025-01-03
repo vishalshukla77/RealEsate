@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';  // Correct import for toast notifications
+import dayjs from "dayjs";
 
 export const api = axios.create({
   baseURL: "http://localhost:8000/api/",  // Ensure the base URL is correct
@@ -65,3 +66,51 @@ export const createuser = async (email,token) => {
 
 
 
+export const bookVisit = async (date, propertyId, email, token) => {
+  try {
+    // Make the API call to book a visit
+    await api.post(
+      `/user/bookVisit/${propertyId}`,
+      {
+        email,
+        id: propertyId,
+        date: dayjs(date).format("DD/MM/YYYY"),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token for authentication
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error in booking visit:", error);
+    throw new Error("Something went wrong. Please try again."); // Throw a user-friendly error
+  }
+};
+
+
+export const removeBooking = async (id, email, token) => {
+  try {
+    await api.post(`user/removeBooking/${id}`);
+  } catch (error) {
+    toast.error("Something went wrong");
+  }
+};
+
+
+
+export const toFav = async (id, email, token) => {
+  try {
+    await api.post(
+      `user/toFav/${id}`,
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error while adding to favorites:", error);
+  }
+};

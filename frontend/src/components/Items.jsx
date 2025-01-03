@@ -3,6 +3,7 @@ import { MdOutlineBed, MdOutlineBathtub, MdOutlineGarage } from 'react-icons/md'
 import { AiOutlineHeart } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import { CgRuler } from 'react-icons/cg'
+import HeartBtn from './HeartBtn';
 function Items({ property }) {
 const navigate=useNavigate();
 
@@ -19,7 +20,7 @@ const navigate=useNavigate();
           className="rounded-xl w-full h-48 object-cover"
         />
         <button className="absolute top-6 right-6 bg-white p-2 rounded-full shadow-md hover:shadow-lg">
-          <AiOutlineHeart className="text-xl text-gray-500 hover:text-red-500" />
+          <HeartBtn id={property?.id} />
         </button>
       </div>
 

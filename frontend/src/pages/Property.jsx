@@ -1,17 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { toast } from "react-toastify";
-import { useQuery } from "@tanstack/react-query";
-import { useLocation, Link } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
-import { AiOutlineHeart } from "react-icons/ai";
+import HeartBtn from "../components/HeartBtn.jsx";
+
 import { MdOutlineBed, MdOutlineBathtub, MdOutlineGarage } from "react-icons/md";
 import { CgRuler } from "react-icons/cg";
 import { FaLocationDot } from "react-icons/fa6";
-import { getProperty } from "../utlis/api"; // Ensure the correct import path
-import Map from "../components/Map"; // Ensure Map is correctly imported
+import { getProperty, removeBooking } from "../utlis/api";
+import Map from "../components/Map";
 import useAuthCheck from "../hooks/userAuthCheck.jsx";
-import BookingModal from "../components/BookingModal"; // Correct BookingModal import
+import BookingModal from "../components/BookingModal";
+import { UserDetailContext } from "../context/UserDetailContext.js";
 
 function Property() {
   const { pathname } = useLocation();
@@ -23,20 +25,34 @@ function Property() {
   });
 
   const [modalOpened, setModalOpened] = useState(false);
-
   const { validateLogin } = useAuthCheck();
   const { user } = useAuth0();
+  const {
+    userDetails: { token, bookings },
+    setUserDetails,
+  } = useContext(UserDetailContext);
+
+  const { mutate: cancelBooking, isLoading: cancelling } = useMutation({
+    mutationFn: () => removeBooking(id, user?.email, token),
+    onSuccess: () => {
+      setUserDetails((prev) => ({
+        ...prev,
+        bookings: prev.bookings.filter((booking) => booking?.id !== id),
+      }));
+      toast.success("Booking cancelled", { position: "bottom-right" });
+    },
+  });
 
   if (isLoading) {
     return (
       <div className="h-64 flexCenter">
-        <PuffLoader height="80" width="80" radius={1} color="#555" aria-label="puff-loading" />
+        <PuffLoader size={80} color="#555" aria-label="puff-loading" />
       </div>
     );
   }
 
-  if (isError) {
-    return <div className="h-64 flexCenter">Error while fetching</div>;
+  if (isError || !data) {
+    return <div className="h-64 flexCenter">Error while fetching or no data available</div>;
   }
 
   const handleBookVisit = () => {
@@ -48,16 +64,18 @@ function Property() {
   return (
     <section className="max-padd-container my-[99px]">
       {/* Property Image */}
-      <div className="pb-2 relative">
-        <img
-          src={data.image}
-          alt={`${data.title} - ${data.category}`}
-          className="rounded-xl w-full max-h-[27rem] self-center object-cover"
-        />
-        <button className="absolute top-6 right-6 bg-white p-2 rounded-full shadow-md hover:shadow-lg">
-          <AiOutlineHeart className="text-xl text-gray-500 hover:text-red-500" />
-        </button>
-      </div>
+      {data.image && (
+        <div className="pb-2 relative">
+          <img
+            src={data.image}
+            alt={`${data.title} - ${data.category}`}
+            className="rounded-xl w-full max-h-[27rem] self-center object-cover"
+          />
+          <button className="absolute top-6 right-6 p-2 rounded-full shadow-md hover:shadow-lg">
+            <HeartBtn id={id} className="text-xl text-gray-500 hover:text-red-500" />
+          </button>
+        </div>
+      )}
 
       {/* Content Below Image */}
       <div className="flex flex-col md:flex-row gap-8 mt-8">
@@ -69,19 +87,15 @@ function Property() {
           </div>
           <h5 className="bold-16 my-1 text-secondary">{data.city}</h5>
           <div className="flex gap-x-4 py-3">
-            {/* Bedrooms */}
             <div className="flex items-center gap-x-2 border-r border-slate-900/50 pr-4 font-semibold">
               <MdOutlineBed className="text-lg" /> {data.facilities?.bedrooms || 0}
             </div>
-            {/* Bathrooms */}
             <div className="flex items-center gap-x-2 border-r border-slate-900/50 pr-4 font-semibold">
               <MdOutlineBathtub className="text-lg" /> {data.facilities?.bathrooms || 0}
             </div>
-            {/* Parking */}
             <div className="flex items-center gap-x-2 font-semibold">
               <MdOutlineGarage className="text-lg" /> {data.facilities?.parkings || 0}
             </div>
-            {/* Area */}
             <div className="flex items-center gap-x-2 font-semibold">
               <CgRuler className="text-lg" /> {data.area || 400}
             </div>
@@ -98,12 +112,30 @@ function Property() {
 
           {/* Book Button */}
           <div className="w-full">
-            <button
-              onClick={handleBookVisit}
-              className="btn-secondary rounded-xl py-3 px-6 shadow-sm bg-primary text-white font-semibold w-full"
-            >
-              Book the Visit
-            </button>
+            {bookings?.some((booking) => booking.id === id) ? (
+              <>
+                <button
+                  onClick={() => cancelBooking()}
+                  className="btn-secondary rounded-xl py-3 px-6 shadow-sm bg-red-500 text-white font-semibold w-full"
+                  disabled={cancelling}
+                >
+                  Cancel Booking
+                </button>
+                <p className="mt-2 text-sm text-gray-600">
+                  You have already booked a visit for{" "}
+                  <span className="font-semibold">
+                    {bookings?.find((booking) => booking.id === id)?.date || "N/A"}
+                  </span>
+                </p>
+              </>
+            ) : (
+              <button
+                onClick={handleBookVisit}
+                className="btn-secondary rounded-xl py-3 px-6 shadow-sm bg-primary text-white font-semibold w-full"
+              >
+                Book the Visit
+              </button>
+            )}
             <BookingModal
               opened={modalOpened}
               setOpened={setModalOpened}
