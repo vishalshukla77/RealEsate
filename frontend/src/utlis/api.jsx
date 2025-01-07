@@ -114,3 +114,27 @@ export const toFav = async (id, email, token) => {
     console.error("Error while adding to favorites:", error);
   }
 };
+
+
+export const getallFav = async (email, token) => {
+  if (!token) return;
+
+  try {
+    const res = await api.post(
+      `/user/allFav`,
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+ 
+
+    return res.data["favResidenciesID"]; // Assuming the favourites are in `res.data`
+  } catch (e) {
+    toast.error("Something went wrong while fetching favourites");
+    console.error("Error fetching favourites:", e); // Logging for debugging
+    throw e; // Re-throw the error if needed
+  }
+};

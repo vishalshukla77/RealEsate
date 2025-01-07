@@ -8,11 +8,12 @@ import { createuser } from '../utlis/api';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {useFavourites} from '../hooks/usefavourites.jsx';
 
 function Layout() {
 
 
-  usefavourites();
+  useFavourites();
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
 

@@ -19,7 +19,7 @@ const navigate=useNavigate();
           alt={`${property.title} - ${property.category}`}
           className="rounded-xl w-full h-48 object-cover"
         />
-        <button className="absolute top-6 right-6 bg-white p-2 rounded-full shadow-md hover:shadow-lg">
+        <button className="absolute top-6 right-6  p-2 rounded-full shadow-md hover:shadow-lg">
           <HeartBtn id={property?.id} />
         </button>
       </div>
