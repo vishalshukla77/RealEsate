@@ -9,11 +9,13 @@ import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {useFavourites} from '../hooks/usefavourites.jsx';
+import useBooking from '../hooks/useBooking.jsx';
 
 function Layout() {
 
 
   useFavourites();
+  useBooking();
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const { setUserDetails } = useContext(UserDetailContext);
 

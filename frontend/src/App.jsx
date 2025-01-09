@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 
 import Home from './pages/Home';
 import Listing from './pages/Listing';
-import AddProperty from './pages/AddProperty';
+
 import Favorites from './pages/Favorites';
 import Bookings from './pages/Bookings';
 import Layout from './components/Layout';
@@ -37,7 +37,7 @@ export default function App() {
                   <Route index element={<Listing />} />
                   <Route path=":propertyId" element={<Property />} />
                 </Route>
-                <Route path="/addproperty" element={<AddProperty />} />
+
                 <Route path="/bookings" element={<Bookings />} />
                 <Route path="/favorites" element={<Favorites />} />
               </Route>
